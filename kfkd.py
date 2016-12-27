@@ -52,7 +52,7 @@ FLOOKUP = './IdLookupTable.csv'
 
 
 def float32(k):
-    return np.cast['float32'](k)
+    return np.cast['float32'](k)    # cast['f'](value)
 
 
 def load(test=False, cols=None):
@@ -61,7 +61,7 @@ def load(test=False, cols=None):
     target columns.
     """
     fname = FTEST if test else FTRAIN
-    df = read_csv(os.path.expanduser(fname))  # load pandas dataframe
+    df = read_csv(os.path.expanduser(fname))  # os.path.expanduser('~') => '/home/bsl'
 
     # The Image column has pixel values separated by space; convert
     # the values to numpy arrays:
@@ -71,13 +71,13 @@ def load(test=False, cols=None):
         df = df[list(cols) + ['Image']]
 
     print(df.count())  # prints the number of values for each column
-    df = df.dropna()  # drop all rows that have missing values in them
+    df = df.dropna()  # drop all rows that have missing values in them, ETL
 
     X = np.vstack(df['Image'].values) / 255.  # scale pixel values to [0, 1]
     X = X.astype(np.float32)
 
     if not test:  # only FTRAIN has any target columns
-        y = df[df.columns[:-1]].values
+        y = df[df.columns[:-1]].values  # except last column for the image
         y = (y - 48) / 48  # scale target coordinates to [-1, 1]
         X, y = shuffle(X, y, random_state=42)  # shuffle train data
         y = y.astype(np.float32)
@@ -89,14 +89,14 @@ def load(test=False, cols=None):
 
 def load2d(test=False, cols=None):
     X, y = load(test=test, cols=cols)
-    X = X.reshape(-1, 1, 96, 96)
+    X = X.reshape(-1, 1, 96, 96)    # infer value @ -1, i.e. nb of samples in this case
     return X, y
 
 
 def plot_sample(x, y, axis):
     img = x.reshape(96, 96)
     axis.imshow(img, cmap='gray')
-    if y is not None:
+    if y is not None:   # [start:end:]
         axis.scatter(y[0::2] * 48 + 48, y[1::2] * 48 + 48, marker='x', s=10)
 
 
